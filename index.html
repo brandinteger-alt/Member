@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand Integer — Member Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F1720;
+    --surface: #171F2A;
+    --surface-2: #1E2733;
+    --border: #2A3542;
+    --text: #EDEAE3;
+    --text-dim: #93A0AD;
+    --gold: #C9A227;
+    --gold-soft: #4A3F1C;
+    --green: #4C9A6A;
+    --red: #C6543D;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 76px;
+  }
+  h1, h2, h3, .num { font-family: 'Space Grotesk', sans-serif; }
+  .app { max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; }
+
+  /* ---------- HEADER ---------- */
+  header {
+    padding: 20px 20px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  header .brand { font-family: 'Space Grotesk'; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; }
+  header .brand span { color: var(--gold); }
+  .pill {
+    font-size: 12px; color: var(--text-dim); background: var(--surface);
+    border: 1px solid var(--border); padding: 5px 10px; border-radius: 100px;
+  }
+
+  /* ---------- SCREENS ---------- */
+  .screen { display: none; padding: 0 20px 20px; animation: fadeIn .25s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none; } }
+
+  /* ---------- CARDS ---------- */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; margin-bottom: 14px;
+  }
+  .card-title { font-size: 13px; color: var(--text-dim); margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .card-value { font-size: 28px; font-weight: 700; margin: 0; }
+  .stat-row { display: flex; gap: 12px; }
+  .stat-row .card { flex: 1; margin-bottom: 0; }
+
+  /* ---------- FORMS ---------- */
+  label { display: block; font-size: 13px; color: var(--text-dim); margin: 14px 0 6px; }
+  input, select {
+    width: 100%; padding: 13px 14px; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 10px; color: var(--text);
+    font-size: 15px; font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--gold); }
+  input::placeholder { color: #5B6774; }
+  .btn {
+    width: 100%; padding: 14px; border-radius: 10px; border: none;
+    font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer;
+    margin-top: 18px;
+  }
+  .btn-primary { background: var(--gold); color: #1A1509; }
+  .btn-primary:active { opacity: 0.85; }
+  .btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  .link-btn {
+    background: none; border: none; color: var(--gold); font-size: 13px;
+    text-decoration: underline; cursor: pointer; padding: 0; margin-top: 14px;
+    display: block; width: 100%; text-align: center;
+  }
+  .msg { font-size: 13px; padding: 10px 12px; border-radius: 8px; margin-top: 12px; display: none; }
+  .msg.show { display: block; }
+  .msg.err { background: rgba(198,84,61,0.15); color: #E39485; }
+  .msg.ok { background: rgba(76,154,106,0.15); color: #8FCBA5; }
+
+  /* ---------- SLOTS ---------- */
+  .slot-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px; border-radius: 10px; background: var(--surface-2);
+    margin-bottom: 10px; border: 1px solid var(--border);
+  }
+  .slot-item .info .p { font-weight: 600; font-size: 14px; }
+  .slot-item .info .d { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .badge { font-size: 11px; padding: 4px 9px; border-radius: 100px; font-weight: 600; }
+  .badge.open { background: rgba(76,154,106,0.18); color: #8FCBA5; }
+  .badge.booked { background: rgba(147,160,173,0.18); color: var(--text-dim); }
+  .book-btn {
+    background: var(--gold); color: #1A1509; border: none; padding: 8px 14px;
+    border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+
+  /* ---------- REFUND TIMELINE (signature element) ---------- */
+  .refund-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px; }
+  .refund-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .refund-top .oid { font-size: 12px; color: var(--text-dim); }
+  .refund-top .overdue-tag { font-size: 11px; color: var(--red); font-weight: 700; background: rgba(198,84,61,0.15); padding: 3px 9px; border-radius: 100px; }
+  .track { display: flex; align-items: center; }
+  .track .stage { flex: 1; text-align: center; position: relative; }
+  .track .stage .dot {
+    width: 12px; height: 12px; border-radius: 50%; background: var(--border);
+    margin: 0 auto 6px; position: relative; z-index: 2;
+  }
+  .track .stage.done .dot { background: var(--green); }
+  .track .stage.current .dot { background: var(--gold); box-shadow: 0 0 0 4px rgba(201,162,39,0.2); }
+  .track .stage .line {
+    position: absolute; top: 5px; left: -50%; width: 100%; height: 2px; background: var(--border); z-index: 1;
+  }
+  .track .stage.done .line, .track .stage.current .line { background: var(--green); }
+  .track .stage:first-child .line { display: none; }
+  .track .stage .lbl { font-size: 10px; color: var(--text-dim); }
+  .track .stage.current .lbl { color: var(--gold); font-weight: 600; }
+  .track .stage.done .lbl { color: var(--green); }
+  .sla-line { font-size: 12px; color: var(--text-dim); margin-top: 12px; }
+
+  /* ---------- NAV ---------- */
+  nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface); border-top: 1px solid var(--border);
+    display: flex; max-width: 480px; margin: 0 auto;
+  }
+  nav button {
+    flex: 1; background: none; border: none; color: var(--text-dim);
+    font-family: inherit; font-size: 11px; padding: 12px 4px 10px; cursor: pointer;
+  }
+  nav button .icon { font-size: 19px; display: block; margin-bottom: 3px; }
+  nav button.active { color: var(--gold); }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--text-dim); font-size: 14px; }
+  .hidden { display: none !important; }
+  .file-drop {
+    border: 1.5px dashed var(--border); border-radius: 10px; padding: 24px;
+    text-align: center; color: var(--text-dim); font-size: 13px; margin-top: 14px;
+    cursor: pointer; background: var(--surface-2);
+  }
+  .file-drop.has-file { border-color: var(--green); color: var(--green); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">Brand<span>Integer</span></div>
+    <div class="pill" id="headerStatus">Not logged in</div>
+  </header>
+
+  <!-- ===================== AUTH SCREEN ===================== -->
+  <div class="screen active" id="screen-auth">
+    <div class="card">
+      <h2 style="margin-top:0;">Member Login</h2>
+      <div id="loginForm">
+        <label>Phone or Email</label>
+        <input type="text" id="loginId" placeholder="9876543210">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••">
+        <button class="btn btn-primary" onclick="doLogin()">Log In</button>
+        <button class="link-btn" onclick="showForgot()">Forgot password?</button>
+        <button class="link-btn" onclick="showSignup()">New here? Create an account</button>
+        <div class="msg" id="loginMsg"></div>
+      </div>
+
+      <div id="signupForm" class="hidden">
+        <label>Full Name</label>
+        <input type="text" id="suName" placeholder="Your name">
+        <label>Phone</label>
+        <input type="text" id="suPhone" placeholder="9876543210">
+        <label>Email (optional, for password reset)</label>
+        <input type="text" id="suEmail" placeholder="you@email.com">
+        <label>Create Password</label>
+        <input type="password" id="suPass" placeholder="At least 6 characters">
+        <button class="btn btn-primary" onclick="doSignup()">Create Account</button>
+        <button class="link-btn" onclick="showLogin()">Already have an account? Log in</button>
+        <div class="msg" id="signupMsg"></div>
+      </div>
+
+      <div id="forgotForm" class="hidden">
+        <label>Phone or Email</label>
+        <input type="text" id="fgId" placeholder="9876543210">
+        <button class="btn btn-primary" onclick="doForgot()">Send Reset Code</button>
+        <div id="fgResetBlock" class="hidden">
+          <label>Reset Code (from email)</label>
+          <input type="text" id="fgToken" placeholder="Paste the code">
+          <label>New Password</label>
+          <input type="password" id="fgNewPass" placeholder="At least 6 characters">
+          <button class="btn btn-primary" onclick="doReset()">Set New Password</button>
+        </div>
+        <button class="link-btn" onclick="showLogin()">Back to login</button>
+        <div class="msg" id="forgotMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SLOTS SCREEN ===================== -->
+  <div class="screen" id="screen-slots">
+    <h2>Available Slots</h2>
+    <div id="slotsList"><div class="empty">Loading slots…</div></div>
+  </div>
+
+  <!-- ===================== ORDER SCREEN ===================== -->
+  <div class="screen" id="screen-order">
+    <h2>Submit Order</h2>
+    <div class="card">
+      <label>Product</label>
+      <input type="text" id="orderProduct" placeholder="e.g. Tinted Sunscreen SPF50">
+      <label>Order Screenshot</label>
+      <div class="file-drop" id="fileDropLabel" onclick="document.getElementById('orderFile').click()">
+        📎 Tap to upload screenshot
+      </div>
+      <input type="file" id="orderFile" accept="image/*" class="hidden" onchange="onFileChosen()">
+      <button class="btn btn-primary" onclick="submitOrder()">Submit Order</button>
+      <div class="msg" id="orderMsg"></div>
+    </div>
+  </div>
+
+  <!-- ===================== DASHBOARD SCREEN ===================== -->
+  <div class="screen" id="screen-dashboard">
+    <h2>My Refunds</h2>
+    <div id="dashboardList"><div class="empty">Loading…</div></div>
+  </div>
+
+  <nav id="mainNav" class="hidden">
+    <button onclick="switchTab('slots')" id="navSlots"><span class="icon">🗓️</span>Slots</button>
+    <button onclick="switchTab('order')" id="navOrder"><span class="icon">🧾</span>Order</button>
+    <button onclick="switchTab('dashboard')" id="navDashboard"><span class="icon">💸</span>Refunds</button>
+    <button onclick="logout()" id="navLogout"><span class="icon">🚪</span>Logout</button>
+  </nav>
+
+</div>
+
+<script>
+// ============ CONFIG ============
+const API_URL = 'https://script.google.com/macros/s/AKfycbzq16hDtjrLO_4eFm9WcUBqcuuFn3e6L_Xkan7tTNYQcnvTxXEChaJFW4uVMDg93VbF/exec';
+
+// ============ SESSION ============
+let session = JSON.parse(localStorage.getItem('bi_session') || 'null');
+
+function saveSession(s) {
+  session = s;
+  localStorage.setItem('bi_session', JSON.stringify(s));
+}
+function clearSession() {
+  session = null;
+  localStorage.removeItem('bi_session');
+}
+
+// ============ API HELPERS ============
+async function apiPost(action, body) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action, token: session ? session.token : undefined, ...body })
+  });
+  return res.json();
+}
+async function apiGet(action, extraParams) {
+  const params = new URLSearchParams({ action, token: session ? session.token : '', ...extraParams });
+  const res = await fetch(API_URL + '?' + params.toString());
+  return res.json();
+}
+
+// ============ AUTH SCREENS ============
+function showLogin() {
+  document.getElementById('loginForm').classList.remove('hidden');
+  document.getElementById('signupForm').classList.add('hidden');
+  document.getElementById('forgotForm').classList.add('hidden');
+}
+function showSignup() {
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('signupForm').classList.remove('hidden');
+  document.getElementById('forgotForm').classList.add('hidden');
+}
+function showForgot() {
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('signupForm').classList.add('hidden');
+  document.getElementById('forgotForm').classList.remove('hidden');
+}
+
+function flash(id, text, ok) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'msg show ' + (ok ? 'ok' : 'err');
+}
+
+async function doLogin() {
+  const identifier = document.getElementById('loginId').value.trim();
+  const password = document.getElementById('loginPass').value;
+  if (!identifier || !password) return flash('loginMsg', 'Enter your phone/email and password.', false);
+  const r = await apiPost('login', { identifier, password });
+  if (r.error) return flash('loginMsg', r.error === 'wrong_password' ? 'Wrong password.' : 'Account not found.', false);
+  saveSession({ token: r.token, member_id: r.member_id, name: r.name });
+  enterApp();
+}
+
+async function doSignup() {
+  const name = document.getElementById('suName').value.trim();
+  const phone = document.getElementById('suPhone').value.trim();
+  const email = document.getElementById('suEmail').value.trim();
+  const password = document.getElementById('suPass').value;
+  if (!name || !phone || !password) return flash('signupMsg', 'Name, phone, and password are required.', false);
+  if (password.length < 6) return flash('signupMsg', 'Password must be at least 6 characters.', false);
+  const r = await apiPost('signup', { name, phone, email, password });
+  if (r.error) return flash('signupMsg', r.error === 'already_exists' ? 'An account already exists with this phone/email.' : 'Something went wrong.', false);
+  saveSession({ token: r.token, member_id: r.member_id, name });
+  enterApp();
+}
+
+let forgotIdentifier = '';
+async function doForgot() {
+  forgotIdentifier = document.getElementById('fgId').value.trim();
+  if (!forgotIdentifier) return flash('forgotMsg', 'Enter your phone or email.', false);
+  const r = await apiPost('forgotPassword', { identifier: forgotIdentifier });
+  if (r.error) return flash('forgotMsg', 'Account not found.', false);
+  document.getElementById('fgResetBlock').classList.remove('hidden');
+  flash('forgotMsg', r.sent_to === 'email' ? 'Reset code sent to your email.' : 'No email on file — ask admin for help resetting.', true);
+}
+async function doReset() {
+  const token = document.getElementById('fgToken').value.trim();
+  const newPassword = document.getElementById('fgNewPass').value;
+  if (newPassword.length < 6) return flash('forgotMsg', 'Password must be at least 6 characters.', false);
+  const r = await apiPost('resetPassword', { identifier: forgotIdentifier, token, newPassword });
+  if (r.error) return flash('forgotMsg', 'Reset code invalid or expired. Request a new one.', false);
+  flash('forgotMsg', 'Password updated! You can log in now.', true);
+  setTimeout(showLogin, 1200);
+}
+
+function logout() {
+  clearSession();
+  document.getElementById('mainNav').classList.add('hidden');
+  document.getElementById('headerStatus').textContent = 'Not logged in';
+  showScreen('screen-auth');
+  showLogin();
+}
+
+// ============ APP SHELL ============
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function switchTab(tab) {
+  document.querySelectorAll('#mainNav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  showScreen('screen-' + tab);
+  if (tab === 'slots') loadSlots();
+  if (tab === 'dashboard') loadDashboard();
+}
+
+function enterApp() {
+  document.getElementById('mainNav').classList.remove('hidden');
+  document.getElementById('headerStatus').textContent = session.name || 'Member';
+  switchTab('slots');
+  startPolling();
+}
+
+// ============ SLOTS ============
+async function loadSlots() {
+  const r = await apiGet('publicSlots');
+  const list = document.getElementById('slotsList');
+  if (!r.length) { list.innerHTML = '<div class="empty">No slots available right now. Check back soon.</div>'; return; }
+  list.innerHTML = r.map(s => `
+    <div class="slot-item">
+      <div class="info">
+        <div class="p">${escapeHtml(s.product)}</div>
+        <div class="d">${escapeHtml(s.date)} · ${escapeHtml(s.time || '')}</div>
+      </div>
+      ${s.status === 'open'
+        ? `<button class="book-btn" onclick="bookSlot('${s.slot_id}')">Book</button>`
+        : `<span class="badge booked">Booked</span>`}
+    </div>
+  `).join('');
+}
+async function bookSlot(slot_id) {
+  const r = await apiPost('bookSlot', { slot_id });
+  if (r.error) { alert(r.error === 'already_booked' ? 'Someone just booked this slot.' : 'Could not book slot.'); }
+  loadSlots();
+}
+
+// ============ ORDER SUBMISSION ============
+let chosenFileBase64 = null, chosenFileMime = null;
+function onFileChosen() {
+  const file = document.getElementById('orderFile').files[0];
+  if (!file) return;
+  chosenFileMime = file.type;
+  const reader = new FileReader();
+  reader.onload = () => {
+    chosenFileBase64 = reader.result.split(',')[1];
+    document.getElementById('fileDropLabel').textContent = '✅ ' + file.name;
+    document.getElementById('fileDropLabel').classList.add('has-file');
+  };
+  reader.readAsDataURL(file);
+}
+async function submitOrder() {
+  const product = document.getElementById('orderProduct').value.trim();
+  if (!product) return flash('orderMsg', 'Enter the product name.', false);
+  if (!chosenFileBase64) return flash('orderMsg', 'Please attach your order screenshot.', false);
+  flash('orderMsg', 'Submitting…', true);
+  const r = await apiPost('submitOrder', { product, screenshotBase64: chosenFileBase64, mimeType: chosenFileMime });
+  if (r.error) return flash('orderMsg', 'Something went wrong. Try again.', false);
+  flash('orderMsg', 'Order submitted! Track your refund under the Refunds tab.', true);
+  document.getElementById('orderProduct').value = '';
+  chosenFileBase64 = null;
+  document.getElementById('fileDropLabel').textContent = '📎 Tap to upload screenshot';
+  document.getElementById('fileDropLabel').classList.remove('has-file');
+}
+
+// ============ DASHBOARD / REFUND TRACKER ============
+const STAGES = [
+  { key: 'not_filed', label: 'Not Filed' },
+  { key: 'filed', label: 'Filed' },
+  { key: 'processing', label: 'Processing' },
+  { key: 'done', label: 'Done' }
+];
+function stageIndex(status) {
+  const i = STAGES.findIndex(s => s.key === status);
+  return i === -1 ? 0 : i;
+}
+async function loadDashboard() {
+  const r = await apiGet('memberDashboard');
+  const list = document.getElementById('dashboardList');
+  if (r.error || !r.refunds || !r.refunds.length) {
+    list.innerHTML = '<div class="empty">No refund requests yet. Submit an order to start one.</div>';
+    return;
+  }
+  list.innerHTML = r.refunds.map(rf => {
+    const idx = stageIndex(rf.rf_status);
+    const stagesHtml = STAGES.map((s, i) => {
+      const cls = i < idx ? 'done' : (i === idx ? 'current' : '');
+      return `<div class="stage ${cls}"><div class="line"></div><div class="dot"></div><div class="lbl">${s.label}</div></div>`;
+    }).join('');
+    const slaDate = new Date(rf.sla_deadline);
+    return `
+      <div class="refund-card">
+        <div class="refund-top">
+          <div class="oid">Order ${escapeHtml(rf.order_id)}</div>
+          ${rf.overdue ? '<div class="overdue-tag">OVERDUE</div>' : ''}
+        </div>
+        <div class="track">${stagesHtml}</div>
+        <div class="sla-line">SLA deadline: ${slaDate.toLocaleDateString()} ${rf.overdue ? '— past due' : ''}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============ REAL-TIME POLLING ============
+let pollTimer = null;
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(() => {
+    const active = document.querySelector('.screen.active').id;
+    if (active === 'screen-slots') loadSlots();
+    if (active === 'screen-dashboard') loadDashboard();
+  }, 7000);
+}
+
+// ============ UTIL ============
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// ============ BOOT ============
+if (session && session.token) {
+  enterApp();
+}
+</script>
+</body>
+</html>
